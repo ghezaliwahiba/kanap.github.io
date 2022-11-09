@@ -1,0 +1,5 @@
+class article{
+    constructor(jsonArticle){
+        
+    }
+}
