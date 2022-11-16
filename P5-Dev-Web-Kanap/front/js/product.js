@@ -34,4 +34,12 @@ function AddKanap (product) {
     const descpt = document.querySelector ("#description")
     descpt.innerHTML=description;
 
+   let ColorsProduct= product.colors;
+    ColorsProduct.forEach (function (color) {
+        console.log(color);
+        let productColor = document.createElement("option");
+        const item =document.querySelector("#colors");
+        productColor.innerText = color;
+        item.appendChild(productColor);
+    });
 }
