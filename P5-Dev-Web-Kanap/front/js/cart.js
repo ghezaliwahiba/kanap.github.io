@@ -9,16 +9,34 @@ for (let i=o; i<localStorage.length; i++){
 }
 */
 
-let ProductLocalStorage =localStorage.getItem(ProductStorage);
-let ProductStorageCart = JSON.parse(ProductLocalStorage);
 
-ProductStorageCart.forEach(function (product) {
+let urlSearchCart = window.location.search; 
+let urlParamsCart= new URLSearchParams (urlSearchCart);
+let id = urlParams.get ("id");
+let ProductLocalStorage;
+const url = "http://localhost:3000/api/products/";
 
-  console.log(product);
+if ( localStorage.getItem(ProductStorage) !=null ){
+  ProductLocalStorage = JSON.parse(ProductLocalStorage);
+}
+else {
+  ProductLocalStorage = []; // inisialiser un tableau (tableau vide)
+}
 
-        const NewArticle = document.createElement('article')
-        const CartItems = document.querySelector ('#cart__items')
-        CartItems.appendChild(NewArticle)
+function GetProductLocalStorage(){
+
+  for(let i=0; i< ProductLocalStorage.length; i++) {
+    
+    fetch(url+ ProductLocalStorage[i].id) // on veut dans l'APi le produit qui correspond à l'id stoqué dans le local storage.
+      .then((response) => response.json())
+       
+      .then((res) => data(res)) 
+
+  
+
+    const NewArticle = document.createElement('article')
+    const CartItems = document.querySelector ('#cart__items')
+    CartItems.appendChild(NewArticle)
 
 
       const DIV = document.createElement('div')
@@ -64,5 +82,6 @@ ProductStorageCart.forEach(function (product) {
       const ProductDeleteCart= document.createElement ("P");
       ProductDeleteCart.innerText = "Supprimer";
       cartItemContentSettingsDelete.appendChild(ProductDeleteCart);
-      
-})
+     
+}
+}
