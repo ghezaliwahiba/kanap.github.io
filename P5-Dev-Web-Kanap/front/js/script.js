@@ -1,5 +1,5 @@
 
-     function AddProducts() {
+    function AddProducts() {
 
     fetch("http://localhost:3000/api/products") //Ce code nous permet d'envoyer une requête HTTP de type GET au service web se trouvant à l'adresse . (Fetch est un ensemble d'objets et de fonctions qui permet d'exécuter des requêtes HTTP).
 //Pour cela Fetch va nous renvoyer une Promise. : la Promise est un objet qui fournit une fonction then qui sera exécutée quand le résultat aura été obtenu,
@@ -8,18 +8,18 @@
           return res.json();  //les resultats sont recupéré et exécuté sous forme json; c'est le format le plus simple
         }
       })// en ayant vérifié au préalable que la requête s’était bien passée avec res.ok. Ce résultat json étant lui aussi une Promise, nous le retournons et récupérons sa vraie valeur dans la fonction then() suivante.
-    .then(function(products) { 
-    
+    .then (function(products) { 
+ 
       /* methode for of*/
 
       for (let product of products) {
       
         var NewA = document.createElement('a');
         var id = product._id
-        NewA.href="./product.html?id=" + id;
+        NewA.href=`product.html?id=${id}`;
         var items = document.querySelector("#items");
         items.appendChild(NewA);
-    
+  
         var article = document.createElement('article');
         NewA.appendChild(article);
     
