@@ -39,14 +39,17 @@ function AddKanap (product) {
         productColor.innerText = color;
         item.appendChild(productColor);
     });
-    
-
-  
 
 const button = document.querySelector('#addToCart') // On récupère l'élément sur lequel on veut détecter le clic
 button.addEventListener('click', function () {  // On écoute l'événement click
 let colors = document.querySelector("#colors").value;
 let quantity = document.querySelector("#quantity").value;
+
+let productLocalStorageString = localStorage.getItem("product");
+console.log(productLocalStorageString); 
+
+let productLocalStorage = JSON.parse(productLocalStorageString);
+console.log(productLocalStorage);
 
 if (colors == '' || quantity == 0) {
 alert ('Please select a color or quantity!') 
@@ -63,6 +66,20 @@ else if (colors == '' || quantity >100){
     return
 }
 
+       const ExistingProductLocalStorage = localStorage.getItem("product")
+    if (ExistingProductLocalStorage){
+        quantity = Number(quantity) + Number(JSON.parse(ExistingProductLocalStorage).quantity)
+        location.assign("cart.html");
+    }
+
+    else if (ExistingProductLocalStorage == null || ExistingProductLocalStorage == 0) {
+        ExistingProductLocalStorage = [];
+        localStorage.setItem("product", JSON.stringify(ExistingProductLocalStorage));
+        messageAlert();
+        location.assign("cart.html");
+    }
+     
+  
 let ProductStorage = {
     id: id,
     colors: colors,
@@ -79,6 +96,3 @@ let ProductStorage = {
 localStorage.setItem(id, JSON.stringify(ProductStorage));
 window.location.href="cart.html";
 });
-
-}
-
