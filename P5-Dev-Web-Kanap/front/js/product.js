@@ -1,6 +1,6 @@
 let urlSearch = window.location.search; //permet de récupérer l’URL du page courante.
 let urlParams= new URLSearchParams (urlSearch);
-let id = urlParams.get ("id");
+let id=urlParams.get ("id");
 
 
 fetch(`http://localhost:3000/api/products/${id}`) 
@@ -14,6 +14,7 @@ function AddKanap (product) {
     let altTxt = product.altTxt;
     let description = product.description;
     let name = product.name;
+    let price=product.price;
   
     const image=document.createElement("img");
     image.src= imageUrl;
@@ -54,7 +55,7 @@ return
 }
 else if (colors == '' || quantity <0){
     alert ('Please select a quantity between 0 and 100!')
-    return 
+    return
 }
 
 else if (colors == '' || quantity >100){
@@ -65,7 +66,7 @@ else if (colors == '' || quantity >100){
 let ProductStorage = {
     id: id,
     colors: colors,
-    quantity: quantity,
+    quantity: Number(quantity),
     price: price,
     imageUrl:imageUrl,
     altTxt:altTxt,
@@ -80,3 +81,4 @@ window.location.href="cart.html";
 });
 
 }
+
