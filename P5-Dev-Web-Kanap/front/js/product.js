@@ -74,8 +74,7 @@ else if (colors == '' || quantity >100){
 
     else if (ExistingProductLocalStorage == null || ExistingProductLocalStorage == 0) {
         ExistingProductLocalStorage = [];
-        localStorage.setItem("product", JSON.stringify(ExistingProductLocalStorage));
-        messageAlert();
+        localStorage.setItem(id, JSON.stringify(ProductStorage));
         location.assign("cart.html");
     }
      
