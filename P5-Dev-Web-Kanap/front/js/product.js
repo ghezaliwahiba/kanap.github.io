@@ -68,7 +68,7 @@ else if (colors == '' || quantity >100){
 
        const ExistingProductLocalStorage = localStorage.getItem("product")
     if (ExistingProductLocalStorage){
-        quantity = Number(quantity) + Number(JSON.parse(ExistingProductLocalStorage).quantity)
+        quantity = Number(quantity);
         location.assign("cart.html");
     }
 
