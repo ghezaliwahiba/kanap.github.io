@@ -1,31 +1,21 @@
 const urlSearchCart = window.location.search;
 const urlParamsCart = new URLSearchParams(urlSearchCart);
 const id = urlParamsCart.get("id");
-let ProductLocalStorage;
 const url="http://localhost:3000/api/products/";
+const cartItems = document.getElementById("cart__items");
+let ProductLocalStorage = JSON.parse(localStorage.getItem("id"));// Initialisation du localstorage
+console.log(ProductLocalStorage);
 
-
-// Initialisation du localstorage
-ProductLocalStorage = JSON.parse(localStorage.getItem("ProductStorage"));
-
-// Affichage d du panier
-  function GetProductLocalStorage() {
-
-  // Si le localstorage est vide
-  if ( ProductLocalStorage === null ||  ProductLocalStorage == 0) {
-      const positionEmptyCart = document.getElementById("cart__items");
-    positionEmptyCart.textContent = "Votre panier est vide";
-  } 
-  
-  else {
-    
-    // Si le localstorage contient des produits
-    for (i = 0; i <  ProductLocalStorage.length; i++) {
-     
-      fetch(url+ ProductLocalStorage[i].id) // on veut reccuperer dans l'APi le produit qui correspond à l'id stoqué dans le local storage.
+// AFFICHER LES PRODUITS DANS LE PANIER SUR LE TABLEAU RÉCAPITULATIF
+if (ProductLocalStorage === null) { //si le panier est vide:
+  cartItems.innerHTML = "Le panier est vide.";
+} else { //si le panier n'est pas vide:
+  for (i = 0; i <  ProductLocalStorage.length; i++) {
+    fetch(url+ ProductLocalStorage[i].id) // on veut reccuperer dans l'APi le produit qui correspond à l'id stoqué dans le local storage.
       .then((response) => response.json())
       .then((res) => data(res)) 
-
+      
+    //Creation de l'article
     let productArticle = document.createElement("article");
     document.querySelector("#cart__items").appendChild(productArticle);
     productArticle.className = "cart__item";
@@ -61,7 +51,6 @@ ProductLocalStorage = JSON.parse(localStorage.getItem("ProductStorage"));
     let productColor = document.createElement("p");
     productTitle.appendChild(productColor);
     productColor.innerHTML = ProductLocalStorage[i].colors;
-    productColor.style.fontSize = "20px";
 
     // Insertion du prix
     let productPrice = document.createElement("p");
@@ -103,6 +92,6 @@ ProductLocalStorage = JSON.parse(localStorage.getItem("ProductStorage"));
     productItemContentSettingsDelete.appendChild(productSupprimer);
     productSupprimer.className = "deleteItem";
     productSupprimer.innerHTML = "Supprimer";
-}
-}
+
+  }
 }
