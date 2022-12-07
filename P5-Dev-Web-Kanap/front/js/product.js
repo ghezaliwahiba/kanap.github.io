@@ -1,119 +1,99 @@
 let urlSearch = window.location.search; //permet de récupérer l’URL du page courante.
-let urlParams= new URLSearchParams (urlSearch);
-const id = urlParams.get("id");
-let ProductLocalStorage = JSON.parse(localStorage.getItem("id"));
-console.log(ProductLocalStorage);
+let urlParams = new URLSearchParams(urlSearch);
+const idP = urlParams.get("id");
 
-fetch(`http://localhost:3000/api/products/${id}`) 
-      .then((response) => response.json())
-       
-      .then((res) => AddKanap(res)) 
+const url = "http://localhost:3000/api/products/";
 
-function AddKanap (product) { 
-console.log(product)
-    let imageUrl = product.imageUrl;
-    let altTxt = product.altTxt;
-    let description = product.description;
-    let name = product.name;
-    let price=product.price;
-  
-    const image=document.createElement("img");
-    image.src= imageUrl;
-    image.alt=altTxt; 
-    const itemme =document.querySelector(".item__img");
-    itemme.appendChild(image);
-   
-    const para =document.querySelector("#title"); 
-    para.textContent=name;
+//On récupère l'article et affiche ses données grâce a l'id
+async function InfoProduct() {
+  await fetch("http://localhost:3000/api/products/" + idP) //Fetch JavaScript peut envoyer des requêtes réseau au serveur et charger de nouvelles informations chaque fois que nécessaire. Par exemple, nous pouvons utiliser une requête réseau pour :
+  //Soumettre une commande, Charger des informations utilisateur, Recevoir les dernières mises à jour du serveur, …etc. … Et tout cela sans recharger la page !//
+    .then((response) => response.json())
+    .then((product) => {
+      let imageUrl = product.imageUrl;
+      let altTxt = product.altTxt;
+      let description = product.description;
+      let name = product.name;
+      let price = product.price;
 
-    const text = document.querySelector("#price");
-    text.innerHTML=price;
+      const image = document.createElement("img");
+      image.src = imageUrl;
+      image.alt = altTxt;
+      const itemme = document.querySelector(".item__img");
+      itemme.appendChild(image);
 
-    const descpt = document.querySelector ("#description");
-    descpt.innerHTML=description;
+      const para = document.querySelector("#title");
+      para.textContent = name;
 
-    let ColorsProduct= product.colors;
-    ColorsProduct.forEach (function (color) {
+      const text = document.querySelector("#price");
+      text.innerHTML = price;
+
+      const descpt = document.querySelector("#description");
+      descpt.innerHTML = description;
+
+      let ColorsProduct = product.colors;
+      ColorsProduct.forEach(function (color) {
         console.log(color);
         let productColor = document.createElement("option");
-        const item =document.querySelector("#colors");
+        const item = document.querySelector("#colors");
         productColor.innerText = color;
         item.appendChild(productColor);
+      });
     });
-
-
-//Fonction pour enregistrer les propriété du produit (couleur et quantité) et ajouter au panier (stockage local)
-
-function addToCart() {
-
- //Faire l'évènement sur le bouton "ajouter au panier"
-const button = document.querySelector('#addToCart') // On récupère l'élément sur lequel on veut détecter le clic
-button.addEventListener('click', function () {  // On écoute l'événement click
-let colors = document.querySelector("#colors").value;
-let quantity = document.querySelector("#quantity").value;
-
-if (colors == '' || quantity == 0) {
-alert ('Please select a color or quantity!') 
-return
-
 }
+InfoProduct();
+//Ajout d'un canapé au panier avec le bouton addButton
+let button = document.getElementById("addToCart"); // On récupère l'élément sur lequel on veut détecter le clic
+// click bouton ajout panier
+button.addEventListener("click", AddKanap);
 
-//1. Vérifiez d'abord si la quantité entrée négative ou superieure à 100 si c'est le cas, affichez l'alerte puis actualisez (ne pas ajouter au panier)
-else if (colors == '' || quantity <0){
-    alert ('Please select a quantity between 0 and 100!')
-    return
-}
-
-else if (colors == '' || quantity >100){
-    alert ('Please select a quantity between 0 and 100!') 
-    return
-}
-
-// //2. Si tout va bien, ajoutez les produits au panier avec les sélections de l'utilisateur pour la couleur et la quantité
-else  {  // création d'un objet pour identfier les donner à stocker dans le localStorage
-
-    let ProductStorage = {
-        id: id,
-        colors: colors,
-        quantity: Number(quantity),
-        price: price,
-        imageUrl:imageUrl,
-        altTxt:altTxt,
-        name:name
-    }
-
-    localStorage.setItem(id ,JSON.stringify (ProductStorage)) 
-    window.location.href= "cart.html"
-}
-
-})
-
-}
-addToCart();
-
-  //s'il y a déjà produit dans le stockage local, ajouter un objet au tableau existant
-  if (ProductLocalStorage) {
-    // vérifiez d'abord si l'article avec le même ID et la même couleur a déjà été sélectionné - si c'est le cas, augmentez la quantité, pourque qu'il n'y ait pas de doublons
-    const ExistProduct = ProductLocalStorage.find(
-      (products) => 
-       products.id == product.id &&
-       products.colors == product.colors
-    );
-    
-    if (ExistProduct) {
-        ExistProduct.quantity = ExistProduct.quantity + product.quantity;
-        localStorage.setItem("id" ,JSON.stringify (ProductLocalStorage))
-      return;
-    }
+ // vérifie si l'article est pas déjà dans le panier
+function AddKanap() {
+  //Etablissement du local storage lors du click 'Ajout au panier'
+  let productStorage = [];
+  if (localStorage.getItem("productStorage") != null) {
+    productStorage = JSON.parse(localStorage.getItem("productStorage"));
+  } else {
+    productStorage = [];
   }
- 
-//Pour aller au panier 
-function redirectionCart(){
-    window.location.href= "cart.html"
-}
-// Function pour ajouter un produit au local storage
 
-function addToLocalStorage() {   
-  localStorage.setItem("id", JSON.stringify(ProductLocalStorage));
+  fetch(url + idP)
+    .then((resp) => resp.json())
+    .then(function (data) {
+      let colors = document.querySelector("#colors");
+      let quantityP = document.querySelector("#quantity");
+       // si l'article est déjà présent, on incrémente la quantité
+      if (quantityP.value > 0 && quantityP.value <= 100 && colors.value != "") {
+        //on initialise notre variable permettant de savoir si l’article est nouveau où s’il est déjà dans le panier.
+        let ExistingProduct = false; // Si l’id du produit est déjà présent dans l’array, c’est que l’article n’est pas nouveau, on passe donc la variable à false
+        let quantity = parseInt(quantityP.value); //Nous utilisons la fonction parseInt pour nous en assurer – cette fonction de transtypage force la conversion des chaines de caractères en nombre et nous permet ainsi d’effectuer des opérations sur les variables.
+        // s'il est nouveau, on l'ajoute.
+        let index;
+        let product = {
+          idP: idP,
+          color: colors.value,
+          quantity: quantity,
+        };
+        for (let i = 0; i < productStorage.length; i++) {
+          if (
+            productStorage[i].id == product.idP &&
+            productStorage[i].colors == product.color
+          ) {
+            ExistingProduct = true; // Sinon, si l'article n'est pas dans le panier, la variable ExistingProduct reste vrai, on ajoute l'article au localstorage, et on fait un push pour ajouter le nouvel article à AddKanap.
+            index = i;
+          }
+        }
+        if (ExistingProduct) {
+          productStorage[index].quantityP += product.quantity;
+        } else {
+          productStorage.push(product); //push pour ajouter le nouvel article à AddKanap.
+        }
+
+        localStorage.setItem("productStorage", JSON.stringify(productStorage)); // enregistrement du canapé dans le local storage
+
+        // AU "CLICK", ENVOI SUR LA PAGE PANIER
+        window.location.href = "./cart.html";
+      }
+    });
 }
-}
+
