@@ -4,9 +4,10 @@ const url = "http://localhost:3000/api/products/";
 const urlSearchCart = window.location.search;
 const urlParamsCart = new URLSearchParams(urlSearchCart);
 const idP = urlParamsCart.get("id");
+let productStorage = JSON.parse(localStorage.getItem("productStorage"));
 
 // variables pour stocker les articles
-let productStorage;
+
 
 // Affichage d du panier
 function GetProductLocalStorage() {
@@ -23,14 +24,16 @@ function GetProductLocalStorage() {
       fetch("http://localhost:3000/api/products/" + productStorage[i].idP) // on veut reccuperer dans l'APi le produit qui correspond à l'idP stoqué dans le local storage.
         .then((response) => response.json())
         .then(function (product) {
-          console.log(url + productStorage[i].idP);
-          console.log(url + productStorage[i].color);
+         // console.log(url + productStorage[i].idP);
+         // console.log(url + productStorage[i].color);
           // On déclare les caractéristiques produits
           let name = product.name;
           let price = product.price;
           let ImgP = product.imageUrl;
           let altImg = product.altTxt;
           let color = product.color;
+           //console.log(product)
+          console.log(product.colors);
 
           let productArticle = document.createElement("article");
           document.querySelector("#cart__items").appendChild(productArticle);
@@ -56,8 +59,7 @@ function GetProductLocalStorage() {
           // Insertion de l'élément "div"
           let productItemContentTitlePrice = document.createElement("div");
           productItemContent.appendChild(productItemContentTitlePrice);
-          productItemContentTitlePrice.className =
-            "cart__item__content__titlePrice";
+          productItemContentTitlePrice.className = "cart__item__content__titlePrice";
 
           // Insertion du titre h3
           let productTitle = document.createElement("h2");
@@ -66,14 +68,15 @@ function GetProductLocalStorage() {
 
           // Insertion de la couleur
           let productColor = document.createElement("p");
-          productTitle.appendChild(productColor);
-          productColor.innerHTML = color;
-          productColor.style.fontSize = "20px";
+          productColor.innerHTML =color;
+          productItemContentTitlePrice.appendChild(productColor);
+          //console.log(productColor);
 
           // Insertion du prix
           let productPrice = document.createElement("p");
           productItemContentTitlePrice.appendChild(productPrice);
           productPrice.innerHTML = price + "  " + " €";
+          //console.log(productPrice);
 
           // Insertion de l'élément "div"
           let productItemContentSettings = document.createElement("div");
@@ -132,31 +135,41 @@ GetProductLocalStorage();
   
  // Récupération la quantité totale
   let GetTotalQuantity=document.getElementById("totalQuantity");
-  let productStorage = JSON.parse(localStorage.getItem("productStorage"));
-  let CalculatTotalQuantityIncart=[];
- 
+  
+
   let totalQuantity = 0; 
-  for(let product of productStorage) {  // met à jour localstorage
-       // on incrémente la qt
-    totalQuantity+=product.quantity;
+  for(let product of productStorage){  // met à jour localstorage
+    // on incrémente la qt
+    totalQuantity+= parseInt(product.quantity);
+    console.log(totalQuantity);
  }
-
- console.log(totalQuantity);
-
- CalculatTotalQuantityIncart.push(totalQuantity);
  GetTotalQuantity.innerHTML=totalQuantity;
 
 // Récupération du prix total
-let productTotalPrice = document.getElementById('totalPrice');
+let productTotalPrice = document.getElementById("totalPrice");
 let totalPrice=0;
 
-for( let products of productStorage) {
-     totalPrice += totalQuantity * products.price;
- }
- CalculatTotalQuantityIncart.push(totalPrice);
- productTotalPrice.innerHTML = totalPrice;
- console.log(totalPrice);
+for (let i = 0; i < productStorage.length; i++){
+  fetch("http://localhost:3000/api/products/" + productStorage[i].idP) 
+        .then((response) => response.json())
+        .then(function (product) {  
+          //console.log(product);
+          //console.log("http://localhost:3000/api/products/");
+          totalPrice += parseInt(productStorage[i].quantity * product.price); 
+            
+          productTotalPrice.innerHTML = totalPrice;
+         // console.log(totalPrice);
+
+})
+
+
 }
+
+
+
+ }
+ 
+
 TotalPrice();
 
 // suppression d'un article
@@ -185,85 +198,156 @@ function QuantityChangeItem(){
   }
 setTimeout(QuantityChangeItem, 500); //changé la quantité après 5 ms.
 
-// les regle du formulaire
 
-function getForm() {
-    const form = document.querySelector(".cart__order__form");
+
+    // les regle du formulaire
     let emailRegExp = new RegExp("^[A-z0-9._-]+[@]{1}[a-zA-Z0-9._-]+[.]{1}[a-zA-Z]{2,10}$"); // Expression associée à la saisie de l'adresse mail: ^ Début de ligne ou de chaîne, [A-z0-9._-]+ : le nom utilisateur ; au moins un caractère alphanumérique, [@]{1} : un symbole @ obligatoirement, [A-z0-9._-]+ : le fournisseur; au moins un caractère alphanumérique, [.]{1} : impérativement un point, [A-z]{2,10} : le domaine ; entre 2 et 10 caractères alphabétiques, $ Fin de ligne ou de chaîne.
     let charRegExp = new RegExp("^[a-zA-Z ,.'-]+$"); //les lettres minuscules (de a à z) sont autorisées, le point et le tiret sont autorisés
     let addressRegExp = new RegExp("^[0-9]{1,3}(?:(?:[,. ]){1}[-a-zA-Zàâäéèêëïîôöùûüç]+)+"); // les chiffres sont autorisés,  saisir entre 1 et 3 caractères autorisés, ? : caractère précédent de 0 à 1 fois,les lettres minuscules y compris les e accentués sont autorisés, + : caractère précédent de 1 à plusieurs fois, 
     
- 
-    form.firstName.addEventListener('change', function() {
+    const inputFirstName = document.getElementById('firstName')
+    inputFirstName.addEventListener('change', function() {
     var firstNameErrorMsg = document.querySelector("#firstNameErrorMsg");
-      firstNameErrorMsg.innerHTML = charRegExp.test(this.value) ? '' : 'Verifiez votre renseignement.';
+      //si le champs respecte les conditions de la regex, il est valide
+		if (inputFirstName.value.match(charRegExp)) {
+			firstNameErrorMsg.innerHTML = ' ';
+			return true;
+	
+		} else {//sinon un message d'erreur s'affiche 
+			firstNameErrorMsg.innerHTML = 'Veuillez renseigner ce champ.'
+			return false;
+		}
     });
     
-    form.lastName.addEventListener('change', function() {
-        var lastNameErrorMsg = document.querySelector("#lastNameErrorMsg");
-      lastNameErrorMsg.innerHTML = charRegExp.test(this.value) ? '' : 'Verifiez votre renseignement.';
+    const inputLastName = document.getElementById('lastName')
+    inputLastName.addEventListener('change', function() {
+    var lastNameErrorMsg = document.querySelector("#lastNameErrorMsg");
+      //si le champs respecte les conditions de la regex, il est valide
+		if (inputLastName.value.match(charRegExp)) {
+			lastNameErrorMsg.innerHTML = ' ';
+			return true;
+			
+		} else {//sinon un message d'erreur s'affiche 
+			lastNameErrorMsg.innerHTML = 'Veuillez renseigner ce champ.'
+		  return false;
+		}
     });
-    
-    form.address.addEventListener('change', function() {
+   
+    const inputAddress = document.getElementById('address')
+    inputAddress.addEventListener('change', function() {
         var addressErrorMsg = document.querySelector("#addressErrorMsg");
-      addressErrorMsg.innerHTML = addressRegExp.test(this.value) ? '' : 'Verifiez votre adresse.';
+       //si le champs respecte les conditions de la regex, il est valide
+		if (inputAddress.value.match(addressRegExp)) {
+			addressErrorMsg.innerHTML = ' ';
+			return true;
+			
+		} else {//sinon un message d'erreur s'affiche 
+			addressErrorMsg.innerHTML = 'Veuillez renseigner ce champ.'
+		  return false;
+		}
     });
     
-    form.city.addEventListener('change', function() {
-        var cityErrorMsg = document.querySelector("#cityErrorMsg");
-        cityErrorMsg.innerHTML = charRegExp.test(this.value) ? '' : 'Verifiez votre ville.';
+    const inputCity = document.getElementById('city')
+    inputCity.addEventListener('change', function() {
+    var cityErrorMsg = document.querySelector("#cityErrorMsg");
+      //si le champs respecte les conditions de la regex, il est valide
+		if (inputCity.value.match(charRegExp)) {
+			cityErrorMsg.innerHTML = ' ';
+			return true;
+			
+		} else {//sinon un message d'erreur s'affiche 
+			cityErrorMsg.innerHTML = 'Veuillez renseigner ce champ.'
+			return false;
+		}
     });
     
-    form.email.addEventListener('change', function() {
+    const inputEmail = document.getElementById('email')
+    inputEmail.addEventListener('change', function() {
         var emailErrorMsg = document.querySelector("#emailErrorMsg");
-        emailErrorMsg.innerHTML = emailRegExp.test(this.value) ? '' : 'Verifiez votre email.';
+         //si le champs respecte les conditions de la regex, il est valide
+		if (inputEmail.value.match(emailRegExp)) {
+			emailErrorMsg.innerHTML = ' ';
+			return true;
+			
+		} else {//sinon un message d'erreur s'affiche 
+			emailErrorMsg.innerHTML = 'Veuillez renseigner ce champ.'
+			return false;
+		}
     });
-    }
-  getForm();
+ 
   
   // Passer la commande: 
+    //Ecoute du bouton commander et actions si oui ou non le formulaire est bien rempli
 
-  function postForm(){
-    const btn_commander = document.getElementById("order");
-  
-    // // click bouton commander 
-    btn_commander.addEventListener("click", ()=>{
-        let productPanier = [];
-        for (const i in productStorage) {
-            productPanier.push(productStorage[i]); // //push pour ajouter le panier dans le nouvel tableau productPanier.
+	const boutonCommaner = document.getElementById('order')
+
+	boutonCommaner.addEventListener('click', (e) => {
+		e.preventDefault()
+		//si le panier est vide on affiche ce message
+		if (productStorage === null || productStorage.length === 0) {
+			alert('Votre panier est vide')
+		}
+		 else {
+			//si un des champs ne contient rien on affiche ce message
+			if (
+				!inputFirstName.value ||
+				!inputLastName.value ||
+				!inputAddress.value ||
+				!inputCity.value ||
+				!inputEmail.value
+			) {
+				alert('Veuillez renseigner tous les champs du formulaire')
+        
+			} 
+			
+			else {
+				//si tous les champs sont remplis on crée un objet contenant les infos client et produits du panier
+				let ProductPanier = []
+				for (let i = 0; i < productStorage.length; i++) {
+					ProductPanier.push(productStorage[i].idP)
+					
+				}
+
+				let orderData = {
+					contact: {
+						firstName: inputFirstName.value,
+						lastName: inputLastName.value,
+						address: inputAddress.value,
+						city: inputCity.value,
+						email: inputEmail.value,
+					},
+					ProductPanier,
+				}
+				//console.log(orderData)
+
+				//Métode d'envoi des données
+        fetch('http://localhost:3000/api/products/order', {
+					method: 'POST',
+					headers: {
+					"Accept": "application/json",
+        "Content-Type": "application/json"
+					},
+					body: JSON.stringify(orderData),
+				})
+				//console.log(orderPost)
+     
+				//Envoi des données à l'API
+            .then((res) => res.json())
+            .then (data => {
+								console.log(data)
+								//on redirige vers la page de confirmation de commande avec l'order Id dans l'url
+                localStorage.setItem("orderId", data.orderId)
+                window.location = "confirmation.html";
+                console.log(orderId);
+							})
+							.catch((err) => {
+								console.log('erreur fetch requête poste', err)
+							})
+              
         }
-        // les données à envoyer à l'API
-        const order = {
-          
-                firstName: document.getElementById('firstName').value,
-                lastName: document.getElementById('lastName').value,
-                address: document.getElementById('address').value,
-                city: document.getElementById('city').value,
-                email: document.getElementById('email').value, 
-        } 
-        
-        // options pour poster l'objet sur l'API, et soumettre l’objet order en JSON :
-        const options = { //Requêtes POST: Pour faire une requête POST, ou une requête avec une autre méthode, nous devons utiliser les options fetch :
-            method: 'POST', //La méthode. Il s’agit de l’action que l’on souhaite faire : récupérer une ressource, la supprimer, etc… la méthode POST: permet de créer ou modifier une ressource, comme;
-            body: JSON.stringify(order),
-            headers: { //Pour définir un en-tête de requête dans fetch, nous pouvons utiliser l’option headers. Il a un objet avec des en-têtes sortants, comme ceci :
-              'Content-Type': 'application/json;charset=utf-8' // si nous envoyons du JSON, nous utiliserons à la place l’option headers pour envoyer application/json, le bon Content-Type pour les données encodées en JSON.
-            },
-        };
-        
-        // Envoie à l'API 
-        fetch("http://localhost:3000/api/products/order", options)
-        .then((response) => response.json())
-        .then((data) => {
-          // Au clic sur le bouton “Commander”, le JavaScript masque le tableau, remplace localStorage actuel par le numéro de commande et renvoi vers la page de confirmation.
-          localStorage.clear();
-          document.location.href = "./confirmation.html";
-        })
-        .catch ((error) => {
-          return error;
-        });
-        })
-       
-  }
-  postForm();
+      }
+    });
   
+
+
+
